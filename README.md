@@ -9,6 +9,7 @@ A console-based project developed in **C++** to manage a library system using **
 - Add new books with ID, title, and author
 - Display all available books
 - Search for a book by title
+- Delete existing book by title
 - Save book records to file (`library.txt`)
 - Load existing records on startup
 

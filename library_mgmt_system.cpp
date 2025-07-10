@@ -12,104 +12,128 @@ struct Book {
 
 Book* head = nullptr;
 
-// Function to add a book to the linked list
 void addBook(int id, string title, string author) {
     Book* newBook = new Book{id, title, author, nullptr};
     if (!head) {
         head = newBook;
     } else {
         Book* temp = head;
-        while (temp->next)
-            temp = temp->next;
+        while (temp->next) temp = temp->next;
         temp->next = newBook;
     }
-    cout << "Book added successfully.\n";
+    cout << "Book added successfully!\n";
 }
 
-// Function to display all books
 void displayBooks() {
     Book* temp = head;
-    if (!temp) {
-        cout << "No books available.\n";
-        return;
-    }
-    cout << "Book List:\n";
+    cout << "\n--- Book List ---\n";
     while (temp) {
         cout << "ID: " << temp->id << ", Title: " << temp->title << ", Author: " << temp->author << endl;
         temp = temp->next;
     }
 }
 
-// Function to search for a book by title
-void searchBook(string title) {
+void searchBook(string query) {
     Book* temp = head;
+    bool found = false;
     while (temp) {
-        if (temp->title == title) {
-            cout << "Book found - ID: " << temp->id << ", Author: " << temp->author << endl;
-            return;
+        if (temp->title == query) {
+            cout << "\nBook Found:\nID: " << temp->id << ", Title: " << temp->title << ", Author: " << temp->author << endl;
+            found = true;
+            break;
         }
         temp = temp->next;
     }
-    cout << "Book not found.\n";
+    if (!found) cout << "\nBook not found.\n";
 }
 
-// Function to save books to a file
-void saveToFile() {
-    ofstream out("library.txt");
+void deleteBook(string query) {
     Book* temp = head;
+    Book* prev = nullptr;
     while (temp) {
-        out << temp->id << "," << temp->title << "," << temp->author << endl;
+        if (temp->title == query) {
+            if (prev) {
+                prev->next = temp->next;
+            } else {
+                head = temp->next;
+            }
+            delete temp;
+            cout << "\nBook deleted successfully.\n";
+            return;
+        }
+        prev = temp;
         temp = temp->next;
     }
-    out.close();
-    cout << "Books saved to file.\n";
+    cout << "\nBook not found to delete.\n";
 }
 
-// Function to load books from a file
-void loadFromFile() {
-    ifstream in("library.txt");
-    if (!in) {
-        cout << "File not found.\n";
-        return;
+void saveToFile() {
+    ofstream file("library.txt");
+    Book* temp = head;
+    while (temp) {
+        file << temp->id << "," << temp->title << "," << temp->author << endl;
+        temp = temp->next;
     }
+    file.close();
+}
+
+void loadFromFile() {
+    ifstream file("library.txt");
+    string line, title, author;
     int id;
-    string title, author, line;
-    while (getline(in, line)) {
-        size_t pos1 = line.find(",");
-        size_t pos2 = line.rfind(",");
-        id = stoi(line.substr(0, pos1));
-        title = line.substr(pos1 + 1, pos2 - pos1 - 1);
-        author = line.substr(pos2 + 1);
+    while (getline(file, line)) {
+        size_t p1 = line.find(',');
+        size_t p2 = line.rfind(',');
+        id = stoi(line.substr(0, p1));
+        title = line.substr(p1 + 1, p2 - p1 - 1);
+        author = line.substr(p2 + 1);
         addBook(id, title, author);
     }
-    in.close();
-    cout << "Books loaded from file.\n";
+    file.close();
 }
 
 int main() {
     loadFromFile();
-    int choice;
-    do {
-        cout << "\n1. Add Book\n2. Display Books\n3. Search Book\n4. Save & Exit\nEnter your choice: ";
+    int choice, id;
+    string title, author;
+
+    while (true) {
+        cout << "\n===== LIBRARY MENU =====\n";
+        cout << "1. Add Book\n2. Display Books\n3. Search Book\n4. Delete Book\n5. Save & Exit\nEnter choice: ";
         cin >> choice;
         cin.ignore();
-        if (choice == 1) {
-            int id;
-            string title, author;
-            cout << "Enter Book ID: "; cin >> id; cin.ignore();
-            cout << "Enter Title: "; getline(cin, title);
-            cout << "Enter Author: "; getline(cin, author);
-            addBook(id, title, author);
-        } else if (choice == 2) {
-            displayBooks();
-        } else if (choice == 3) {
-            string title;
-            cout << "Enter Title to Search: "; getline(cin, title);
-            searchBook(title);
-        } else if (choice == 4) {
-            saveToFile();
-        }
-    } while (choice != 4);
 
+        switch (choice) {
+        case 1:
+            cout << "Enter Book ID: ";
+            cin >> id;
+            cin.ignore();
+            cout << "Enter Title: ";
+            getline(cin, title);
+            cout << "Enter Author: ";
+            getline(cin, author);
+            addBook(id, title, author);
+            break;
+        case 2:
+            displayBooks();
+            break;
+        case 3:
+            cout << "Enter title to search: ";
+            getline(cin, title);
+            searchBook(title);
+            break;
+        case 4:
+            cout << "Enter title to delete: ";
+            getline(cin, title);
+            deleteBook(title);
+            break;
+        case 5:
+            saveToFile();
+            cout << "Data saved. Exiting...\n";
+            return 0;
+        default:
+            cout << "Invalid choice.\n";
+        }
+    }
     return 0;
 }
